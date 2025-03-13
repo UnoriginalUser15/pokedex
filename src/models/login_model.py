@@ -3,7 +3,7 @@ import pandas as pd # used to load the csv file
 
 
 # function for logging in 
-def login_backend(username, password):
+def login(username, password):
 
     valid_login = False
     user_info = None
@@ -37,3 +37,51 @@ def login_backend(username, password):
 
     # returns all the import data to 'app.py'
     return user_info, error_msg, valid_login
+
+# registers new accounts
+def register(username, password):
+    register_msg = ""
+
+    # loads the csv file into a pandas datafram
+    df = pd.read_csv('src/user_data.csv')
+    df = df.set_index('userID')
+    # gets list of existing usernames
+    user_list = df['username'].to_list()
+
+    if username == "":
+        register_msg = "Username cannot be blank"
+        return register_msg
+    
+    elif password == "":
+        register_msg = "Password cannot be blank"
+        return register_msg
+    
+    elif username not in user_list:
+        try:
+            user_id = (df.iloc[-1].name) + 1
+
+            new_user = {
+                "userID": user_id,
+                "username": username,
+                "password": password,
+                "poke1": "",
+                "poke2": "",
+                "poke3": "",
+                "poke4": "",
+                "poke5": "",
+                "poke6": ""
+            }
+
+            new_user_df = pd.DataFrame([new_user])
+            # appends the new user to the .csv file
+            new_user_df.to_csv('src/user_data.csv', mode='a',index=False , header= False)
+
+            register_msg = "New account has been created!"
+        except:
+            register_msg = "Unknown error occured when registering"
+        
+        return register_msg
+    
+    else:
+        register_msg = "Username already exists"
+        return register_msg
