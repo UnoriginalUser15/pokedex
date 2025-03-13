@@ -16,7 +16,7 @@ def display_main():
 
     # initialises the customtkinter frame
     root = ctk.CTk()
-    root.title("pokedex")
+    root.title("Pokédex")
     root.geometry("480x640")
     root.resizable(False, False)
 
