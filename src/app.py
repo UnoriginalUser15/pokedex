@@ -23,6 +23,8 @@ while valid_login == False:
         password = login_input[1]
         # creates a new user
         register_msg = login_model.register(username, password)
+
+        error_msg = ""
     
     # runs the login backend
     elif login_input[2] == "login":
@@ -34,6 +36,8 @@ while valid_login == False:
         user_data = login_output[0] # pandas dataframe
         error_msg = login_output[1] # string
         valid_login = login_output[2] # True or False
+        
+        register_msg = ""
 
 
 main_view.display_main()
