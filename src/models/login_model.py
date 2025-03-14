@@ -10,7 +10,7 @@ def login(username, password):
     error_msg = ""
 
     # loads the csv file into a pandas datafram
-    df = pd.read_csv('src/user_data.csv')
+    df = pd.read_csv('src/data/user_data.csv')
     df = df.set_index('userID')
     # gets list of existing usernames
     user_list = df['username'].to_list()
@@ -43,7 +43,7 @@ def register(username, password):
     register_msg = ""
 
     # loads the csv file into a pandas datafram
-    df = pd.read_csv('src/user_data.csv')
+    df = pd.read_csv('src/data/user_data.csv')
     df = df.set_index('userID')
     # gets list of existing usernames
     user_list = df['username'].to_list()
@@ -64,17 +64,17 @@ def register(username, password):
                 "userID": user_id,
                 "username": username,
                 "password": password,
-                "poke1": "",
-                "poke2": "",
-                "poke3": "",
-                "poke4": "",
-                "poke5": "",
-                "poke6": ""
+                "poke1": "Empty",
+                "poke2": "Empty",
+                "poke3": "Empty",
+                "poke4": "Empty",
+                "poke5": "Empty",
+                "poke6": "Empty"
             }
 
             new_user_df = pd.DataFrame([new_user])
             # appends the new user to the .csv file
-            new_user_df.to_csv('src/user_data.csv', mode='a',index=False , header= False)
+            new_user_df.to_csv('src/data/user_data.csv', mode='a',index=False , header= False)
 
             register_msg = "New account has been created!"
         except:
