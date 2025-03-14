@@ -1,6 +1,7 @@
 import models.login_model as login_model # login backend
-import views.login_view as login_view
-import views.main_view as main_view
+import models.main_model as main_model # main backend
+import views.login_view as login_view  # login frontend
+import views.main_view as main_view  # main frontend
 
 
 # controls the login system
@@ -14,7 +15,7 @@ while valid_login == False:
     login_input = login_view.display_login(error_msg, register_msg)
 
     # closes program if the user closes the window
-    if login_input == False:
+    if login_input == "close":
         quit()
     
     # registers a new user if the user clicks the register button
@@ -39,5 +40,16 @@ while valid_login == False:
         
         register_msg = ""
 
+# controls an active session
+active_session = True
 
-main_view.display_main()
+while active_session == True:
+    print(user_data['poke1'].to_list()[0])
+    search_input = main_view.display_main(user_data)
+
+    if search_input == False:
+        quit()
+
+    main_model.search(search_input)
+
+    active_session = False
