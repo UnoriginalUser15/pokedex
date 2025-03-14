@@ -120,8 +120,8 @@ def display_login(error_msg, register_msg):
 
     # displays the window
     root.mainloop()
-    # if the user closes the window then it returns false
+    # if the user closes the window then it returns 'close'
     try:
         return username, password, log_or_reg
     except:
-        return False
+        return "close"
