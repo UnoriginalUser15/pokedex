@@ -51,5 +51,3 @@ while active_session == True:
         quit()
 
     main_model.search(search_input)
-
-    active_session = False
