@@ -85,7 +85,7 @@ def display_login(error_msg, register_msg):
     password_ent = ctk.CTkEntry(root, textvariable=password_var,
                                 fg_color=WHITE, border_color=RED,
                                 text_color=BLACK,
-                                width=208)
+                                width=208, show="*")
 
     error_lbl = ctk.CTkLabel(root, text=error_msg, text_color=RED)
     register_lbl = ctk.CTkLabel(root, text=register_msg, text_color=YELLOW)

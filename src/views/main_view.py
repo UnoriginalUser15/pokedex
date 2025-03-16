@@ -35,24 +35,44 @@ def display_main(user_data):
             root.destroy()
 
     # gets the sprite to display in the buttons
-    def get_sprite(pokemon):
-        
-        if user_data[pokemon].to_list()[0] != "Empty":
-            # loads the relevant pokemon data into 'poke_data.json'
-            main_model.search(user_data[pokemon].to_list()[0])
+    def get_sprite(pokemon, mode):
+        match mode:
+            case "screen":
+                if pokemon != "Empty":
+                    # loads the relevant pokemon data into 'poke_data.json'
+                    main_model.search(pokemon)
 
-            with open("src/data/poke_data.json", "r") as file:
-                poke_data = json.load(file)
-                img_url = poke_data['sprites']['front_default']
-            with urllib.request.urlopen(img_url) as u:
-                raw_data = u.read()
+                    with open("src/data/poke_data.json", "r") as file:
+                        poke_data = json.load(file)
+                        img_url = poke_data['sprites']['front_default']
+                    with urllib.request.urlopen(img_url) as u:
+                        raw_data = u.read()
 
-            # creates the image that is to be displayed in the button
-            img = ImageTk.PhotoImage(Image.open(io.BytesIO(raw_data)).resize((65, 65)))
-        else:
-            img = ImageTk.PhotoImage(file="src/assets/transparent_placeholder.png")
+                    # creates the image that is to be displayed in the button
+                    img = ImageTk.PhotoImage(Image.open(io.BytesIO(raw_data)).resize((200, 200)))
+                else:
+                    img = ImageTk.PhotoImage(Image.open("src/assets/transparent_placeholder.png"))
+            case "button":
+                if user_data[pokemon].to_list()[0] != "Empty":
+                    # loads the relevant pokemon data into 'poke_data.json'
+                    main_model.search(user_data[pokemon].to_list()[0])
+
+                    with open("src/data/poke_data.json", "r") as file:
+                        poke_data = json.load(file)
+                        img_url = poke_data['sprites']['front_default']
+                    with urllib.request.urlopen(img_url) as u:
+                        raw_data = u.read()
+
+                    # creates the image that is to be displayed in the button
+                    img = ImageTk.PhotoImage(Image.open(io.BytesIO(raw_data)).resize((65, 65)))
+                else:
+                    img = ImageTk.PhotoImage(Image.open("src/assets/transparent_placeholder.png"))
         
         return img
+
+
+    def create_screen():
+        pass
 
     # list of colours that will be used for the UI
     RED = "#DC0A2D"
@@ -108,8 +128,16 @@ def display_main(user_data):
                                         size=(420, 260))
     screen_background_lbl = ctk.CTkLabel(root, text="", image=screen_background_img)
 
-    screen_frm = ctk.CTkFrame(root,bg_color=WHITE ,fg_color=BLACK, corner_radius=20,
+    screen_frm = ctk.CTkFrame(root,bg_color="transparent" ,fg_color=BLACK, corner_radius=0,
                                 width=340, height=220)
+    # prevents the frame from adjusting its size based on contents
+    screen_frm.grid_propagate(False)
+    
+    pokemon_img = ctk.CTkLabel(screen_frm, text="", image=get_sprite('sylveon', 'screen'))
+    pokemon_lbl = ctk.CTkLabel(screen_frm, text='sylveon', text_color=WHITE, font=("Arial", 24))
+
+    stats_frm = ctk.CTkScrollableFrame(screen_frm, bg_color="transparent", fg_color="grey20",
+                                        width=120, height=200, label_text="Stats", label_fg_color=RED)
 
     # --buttons widgets--
     buttons_frm = ctk.CTkFrame(root, bg_color=RED, fg_color=RED, width=420, height=320)
@@ -119,28 +147,32 @@ def display_main(user_data):
     btn_1 = ctk.CTkButton(buttons_frm,text=user_data['poke1'].to_list()[0],
                         fg_color=BLUE, bg_color=RED, text_color=BLACK,
                         hover_color=BLUESHADE, corner_radius=20, width=100, height=100,
-                        image=get_sprite('poke1'), compound="top")
+                        image=get_sprite('poke1', 'button'), compound="top")
 
     btn_2 = ctk.CTkButton(buttons_frm,text=user_data['poke2'].to_list()[0],
                         fg_color=BLUE, bg_color=RED, text_color=BLACK,
                         hover_color=BLUESHADE, corner_radius=20, width=100, height=100,
-                        image=get_sprite('poke2'), compound="top")
+                        image=get_sprite('poke2', 'button'), compound="top")
+    
     btn_3 = ctk.CTkButton(buttons_frm,text=user_data['poke3'].to_list()[0],
                         fg_color=BLUE, bg_color=RED, text_color=BLACK,
                         hover_color=BLUESHADE, corner_radius=20, width=100, height=100,
-                        image=get_sprite('poke3'), compound="top")
+                        image=get_sprite('poke3', 'button'), compound="top")
+    
     btn_4 = ctk.CTkButton(buttons_frm, text=user_data['poke4'].to_list()[0],
                         fg_color=BLUE, bg_color=RED, text_color=BLACK,
                         hover_color=BLUESHADE, corner_radius=20, width=100, height=100,
-                        image=get_sprite('poke4'), compound="top")
+                        image=get_sprite('poke4', 'button'), compound="top")
+    
     btn_5 = ctk.CTkButton(buttons_frm, text=user_data['poke5'].to_list()[0],
                         fg_color=BLUE, bg_color=RED, text_color=BLACK,
                         hover_color=BLUESHADE, corner_radius=20, width=100, height=100,
-                        image=get_sprite('poke5'), compound="top")
+                        image=get_sprite('poke5', 'button'), compound="top")
+    
     btn_6 = ctk.CTkButton(buttons_frm, text=user_data['poke6'].to_list()[0],
                         fg_color=BLUE, bg_color=RED, text_color=BLACK,
                         hover_color=BLUESHADE, corner_radius=20, width=100, height=100,
-                        image=get_sprite('poke6'), compound="top")
+                        image=get_sprite('poke6', 'button'), compound="top")
 
     search_btn = ctk.CTkButton(buttons_frm, text="Search", command=search,
                                 fg_color=YELLOW, bg_color=RED, text_color=BLACK,
@@ -159,7 +191,12 @@ def display_main(user_data):
     side_bar_frm.grid(column=4, row=0, rowspan=5)
 
     screen_background_lbl.grid(column=0, row=1, columnspan=4)
-    screen_frm.grid(column=0, row=1, columnspan=4)
+    screen_frm.grid(column=0, row=1, columnspan=4, rowspan=2)
+    
+    pokemon_img.grid(column=0, row=1, padx=10, pady=(10, 0))
+    pokemon_lbl.grid(column=0, row=2, pady=(0, 10))
+
+    stats_frm.grid(column=1, row=1, rowspan=50, padx=(0, 10), pady=10)
 
     btn_1.grid(column=0, row=3, padx=(30, 15), pady=(20, 10))
     btn_2.grid(column=1, row=3, padx=(15, 15), pady=(20, 10))
