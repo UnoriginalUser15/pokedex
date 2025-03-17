@@ -103,6 +103,7 @@ def display_main(user_data):
             # the rest of the stats
             for stat in poke_data['stats']:
                 stats_list.append(str(stat['base_stat']))
+            stats_list.append(str(poke_data['types'][0]['type']['name']))
 
             return stats_list
         except:
