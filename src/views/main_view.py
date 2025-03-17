@@ -9,14 +9,28 @@ import models.main_model as main_model
 
 # creates the main view
 def display_main(user_data):
+    global add_mode
+    add_mode = False
 
-    def search():
-        global search_input
+    global global_user_df
+    global_user_df = user_data
 
-        search_input = search_var.get().lower().replace(" ", "")
+    # function that gets the input from the search bar
+    def search(clicked_button, user_data, pokemon_name):
+        global global_user_data
+        global add_mode
 
-        if search_input == "":
-            return
+        if add_mode == True and clicked_button[:4] == 'poke':
+            print("adding :)")
+            global_user_df.loc[0, clicked_button] = pokemon_name
+        
+        elif clicked_button == 'search':
+            global search_input
+            search_input = search_var.get().lower().replace(" ", "")
+            
+            if search_input == "":
+                print("skjdfhwifb")
+                return
 
         # removes the window
         root.destroy()
@@ -44,14 +58,14 @@ def display_main(user_data):
 
                     with open("src/data/poke_data.json", "r") as file:
                         poke_data = json.load(file)
-                        img_url = poke_data['sprites']['front_default']
+                        img_url = poke_data['sprites']['other']['official-artwork']['front_default']
                     with urllib.request.urlopen(img_url) as u:
                         raw_data = u.read()
 
                     # creates the image that is to be displayed in the button
                     img = ImageTk.PhotoImage(Image.open(io.BytesIO(raw_data)).resize((200, 200)))
                 else:
-                    img = ImageTk.PhotoImage(Image.open("src/assets/transparent_placeholder.png"))
+                    img = ImageTk.PhotoImage(Image.open("src/assets/transparent_placeholder.png").resize((200, 200)))
             case "button":
                 if user_data[pokemon].to_list()[0] != "Empty":
                     # loads the relevant pokemon data into 'poke_data.json'
@@ -71,8 +85,37 @@ def display_main(user_data):
         return img
 
 
-    def create_screen():
-        pass
+    def get_stats():
+        # list goes as follows:
+        # [id ,hp, attack, defense, special-attack, special-defense, speed, type]
+        stats_list = []
+
+        try:
+            with open("src/data/poke_data.json") as file:
+                poke_data = json.load(file)
+
+            stats_list.append(str(poke_data['id'])) # id
+            # the rest of the stats
+            for stat in poke_data['stats']:
+                stats_list.append(str(stat['base_stat']))
+
+            return stats_list
+        except:
+            return ["","","","","","","",""]
+
+    # actives mode to add pokemon
+    def active_add():
+        global add_mode
+        add_mode = True
+
+
+    # gets the name of the current pokemon loaded
+    with open("src/data/poke_data.json", "r") as file:
+        try:
+            poke_data = json.load(file)
+            pokemon_name = poke_data['name']
+        except:
+            pokemon_name = "Empty"
 
     # list of colours that will be used for the UI
     RED = "#DC0A2D"
@@ -87,7 +130,7 @@ def display_main(user_data):
     # initialises the customtkinter frame
     root = ctk.CTk()
     root.title("Pokédex")
-    root.geometry("480x640")
+    root.geometry("480x745")
     root.resizable(False, False)
 
     search_var = ctk.StringVar()
@@ -103,6 +146,8 @@ def display_main(user_data):
     search_ent = ctk.CTkEntry(top_bar_frm, placeholder_text="Search for a Pokémon or Type...",
                                 textvariable=search_var, fg_color=WHITE, text_color=BLACK,
                                 corner_radius=10, width=300, height=40)
+
+
 
     # --side bar widgets--
     side_bar_frm = ctk.CTkFrame(root, bg_color=RED, fg_color=RED, width=60, height=640)
@@ -122,22 +167,39 @@ def display_main(user_data):
                                 border_color=BLACK, border_width=6,
                                 corner_radius=30, width=50, height=50)
 
+
+
     # --screen widgets--
     screen_background_img = ctk.CTkImage(light_image=Image.open("./src/assets/Screen Background.png"),
                                         dark_image=Image.open("./src/assets/Screen Background.png"),
-                                        size=(420, 260))
+                                        size=(420, 365))
     screen_background_lbl = ctk.CTkLabel(root, text="", image=screen_background_img)
 
     screen_frm = ctk.CTkFrame(root,bg_color="transparent" ,fg_color=BLACK, corner_radius=0,
-                                width=340, height=220)
+                                width=370, height=270)
     # prevents the frame from adjusting its size based on contents
     screen_frm.grid_propagate(False)
     
-    pokemon_img = ctk.CTkLabel(screen_frm, text="", image=get_sprite('sylveon', 'screen'))
-    pokemon_lbl = ctk.CTkLabel(screen_frm, text='sylveon', text_color=WHITE, font=("Arial", 24))
+    pokemon_img = ctk.CTkLabel(screen_frm, text="", image=get_sprite(pokemon_name, 'screen'))
+    pokemon_lbl = ctk.CTkLabel(screen_frm, text=pokemon_name, text_color=WHITE, font=("Arial", 24))
 
+    # frame that displays pokemon stats
     stats_frm = ctk.CTkScrollableFrame(screen_frm, bg_color="transparent", fg_color="grey20",
                                         width=120, height=200, label_text="Stats", label_fg_color=RED)
+    
+    stat_names = ["id: " ,"hp: ", "attack: ", "defense: ", "special-attack: ", "special-defense: ", "speed: ", "type: "]
+    stat_list = get_stats()
+    
+    for i in range(len(stat_list)):
+        ctk.CTkLabel(stats_frm, text=stat_names[i] + stat_list[i]
+                    ).grid(column=1, row = i + 1, pady=5)
+    
+    add_pokemon_btn = ctk.CTkButton(stats_frm, text="Add Pokémon", fg_color=YELLOW, hover_color=YELLOWSHADE,
+                                    text_color=BLACK, corner_radius=15, width=60, height=30,
+                                    command=active_add)
+    add_pokemon_btn.grid(column=1, row=0, pady=5)
+
+
 
     # --buttons widgets--
     buttons_frm = ctk.CTkFrame(root, bg_color=RED, fg_color=RED, width=420, height=320)
@@ -147,34 +209,40 @@ def display_main(user_data):
     btn_1 = ctk.CTkButton(buttons_frm,text=user_data['poke1'].to_list()[0],
                         fg_color=BLUE, bg_color=RED, text_color=BLACK,
                         hover_color=BLUESHADE, corner_radius=20, width=100, height=100,
-                        image=get_sprite('poke1', 'button'), compound="top")
+                        image=get_sprite('poke1', 'button'), compound="top",
+                        command=lambda: search('poke1', user_data, pokemon_name))
 
     btn_2 = ctk.CTkButton(buttons_frm,text=user_data['poke2'].to_list()[0],
                         fg_color=BLUE, bg_color=RED, text_color=BLACK,
                         hover_color=BLUESHADE, corner_radius=20, width=100, height=100,
-                        image=get_sprite('poke2', 'button'), compound="top")
+                        image=get_sprite('poke2', 'button'), compound="top",
+                        command=lambda: search('poke2', user_data, pokemon_name))
     
     btn_3 = ctk.CTkButton(buttons_frm,text=user_data['poke3'].to_list()[0],
                         fg_color=BLUE, bg_color=RED, text_color=BLACK,
                         hover_color=BLUESHADE, corner_radius=20, width=100, height=100,
-                        image=get_sprite('poke3', 'button'), compound="top")
+                        image=get_sprite('poke3', 'button'), compound="top",
+                        command=lambda: search('poke3', user_data, pokemon_name))
     
     btn_4 = ctk.CTkButton(buttons_frm, text=user_data['poke4'].to_list()[0],
                         fg_color=BLUE, bg_color=RED, text_color=BLACK,
                         hover_color=BLUESHADE, corner_radius=20, width=100, height=100,
-                        image=get_sprite('poke4', 'button'), compound="top")
+                        image=get_sprite('poke4', 'button'), compound="top",
+                        command=lambda: search('poke4', user_data, pokemon_name))
     
     btn_5 = ctk.CTkButton(buttons_frm, text=user_data['poke5'].to_list()[0],
                         fg_color=BLUE, bg_color=RED, text_color=BLACK,
                         hover_color=BLUESHADE, corner_radius=20, width=100, height=100,
-                        image=get_sprite('poke5', 'button'), compound="top")
+                        image=get_sprite('poke5', 'button'), compound="top",
+                        command=lambda: search('poke5', user_data, pokemon_name))
     
     btn_6 = ctk.CTkButton(buttons_frm, text=user_data['poke6'].to_list()[0],
                         fg_color=BLUE, bg_color=RED, text_color=BLACK,
                         hover_color=BLUESHADE, corner_radius=20, width=100, height=100,
-                        image=get_sprite('poke6', 'button'), compound="top")
+                        image=get_sprite('poke6', 'button'), compound="top",
+                        command=lambda: search('poke6', user_data, pokemon_name))
 
-    search_btn = ctk.CTkButton(buttons_frm, text="Search", command=search,
+    search_btn = ctk.CTkButton(buttons_frm, text="Search", command=lambda: search('search', user_data, pokemon_name),
                                 fg_color=YELLOW, bg_color=RED, text_color=BLACK,
                                 hover_color=YELLOWSHADE, corner_radius=20, width=360, height=40)
 
@@ -216,6 +284,6 @@ def display_main(user_data):
 
     # if the user closes the window, the program will stop
     try:
-        return search_input
+        return search_input, global_user_df
     except:
-        return False
+        return False, global_user_df
