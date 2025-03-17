@@ -26,6 +26,10 @@ while valid_login == False:
 
     # closes program if the user closes the window
     if login_input == "close":
+        # deletes the content of the json files
+        os.remove("src/data/poke_data.json")
+        os.remove("src/data/type_data.json")
+
         quit()
     
     # registers a new user if the user clicks the register button
