@@ -57,7 +57,6 @@ while active_session == True:
 
     search_input = main_output[0]
     user_data = main_output[1]
-    print(user_data)
 
     if search_input == False:
         # deletes the content of the json files
@@ -75,8 +74,6 @@ while active_session == True:
         df.loc[index, 'poke4'] = user_data['poke4'].to_list()[0]
         df.loc[index, 'poke5'] = user_data['poke5'].to_list()[0]
         df.loc[index, 'poke6'] = user_data['poke6'].to_list()[0]
-
-        print(df)
         
         df.to_csv("src/data/user_data.csv", index=False)
         
