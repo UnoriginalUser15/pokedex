@@ -29,7 +29,12 @@ def display_main(user_data):
             search_input = search_var.get().lower().replace(" ", "")
             
             if search_input == "":
-                print("skjdfhwifb")
+                return
+        
+        elif clicked_button[:4] == "poke":
+            search_input = user_data[clicked_button].tolist()[0]
+
+            if search_input == "Empty":
                 return
 
         # removes the window
