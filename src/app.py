@@ -2,7 +2,15 @@ import models.login_model as login_model # login backend
 import models.main_model as main_model # main backend
 import views.login_view as login_view  # login frontend
 import views.main_view as main_view  # main frontend
+import os # used to create and destroy the json files
+import pandas as pd # writes user_data to csv
 
+
+
+# creates the json files when the program loads
+# (if they don't already exist)
+open("src/data/poke_data.json", "a")
+open("src/data/type_data.json", "a")
 
 # controls the login system
 # gets the user data of the person logged in
@@ -42,12 +50,36 @@ while valid_login == False:
 
 # controls an active session
 active_session = True
+search_input = ""
 
 while active_session == True:
-    print(user_data['poke1'].to_list()[0])
-    search_input = main_view.display_main(user_data)
+    main_output = main_view.display_main(user_data)
+
+    search_input = main_output[0]
+    user_data = main_output[1]
+    print(user_data)
 
     if search_input == False:
-        quit()
+        # deletes the content of the json files
+        os.remove("src/data/poke_data.json")
+        os.remove("src/data/type_data.json")
+        
+        df = pd.read_csv("src/data/user_data.csv")
 
+        username = user_data['username'].to_list()[0]
+        index = df[df['username'] == username].index
+
+        df.loc[index, 'poke1'] = user_data['poke1'].to_list()[0]
+        df.loc[index, 'poke2'] = user_data['poke2'].to_list()[0]
+        df.loc[index, 'poke3'] = user_data['poke3'].to_list()[0]
+        df.loc[index, 'poke4'] = user_data['poke4'].to_list()[0]
+        df.loc[index, 'poke5'] = user_data['poke5'].to_list()[0]
+        df.loc[index, 'poke6'] = user_data['poke6'].to_list()[0]
+
+        print(df)
+        
+        df.to_csv("src/data/user_data.csv", index=False)
+        
+        quit()
+    
     main_model.search(search_input)
