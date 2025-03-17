@@ -18,7 +18,7 @@ def login(username, password):
     # checks if the username exists
     if username in user_list:
         
-        # gets the information about the suer logging in
+        # gets the information about the user logging in
         user_id = df[df['username'] == username].index
         user_info = df.loc[user_id]
 
