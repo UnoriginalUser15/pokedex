@@ -9,8 +9,10 @@ import pandas as pd # writes user_data to csv
 
 # creates the json files when the program loads
 # (if they don't already exist)
-open("src/data/poke_data.json", "a")
-open("src/data/type_data.json", "a")
+with open("src/data/poke_data.json", "a"):
+    print("poke_data.json created")
+with open("src/data/type_data.json", "a"):
+    print("type_data.json created")
 
 # controls the login system
 # gets the user data of the person logged in
