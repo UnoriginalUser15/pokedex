@@ -5,10 +5,11 @@ import io
 import pandas as pd # used to get the values in the 'user_data' dataframe
 import json # used to load the 2 data json files
 import models.main_model as main_model
+import requests
 
 
 # creates the main view
-def display_main(user_data):
+def display_main(user_data, screen_mode):
     global add_mode
     add_mode = False
 
@@ -21,13 +22,12 @@ def display_main(user_data):
         global add_mode
 
         if add_mode == True and clicked_button[:4] == 'poke':
-            print("adding :)")
             global_user_df.loc[0, clicked_button] = pokemon_name
         
         elif clicked_button == 'search':
             global search_input
             search_input = search_var.get().lower().replace(" ", "")
-            
+
             if search_input == "":
                 return
         
@@ -40,6 +40,14 @@ def display_main(user_data):
         # removes the window
         root.destroy()
     
+
+    def type_search(pokemon_name):
+        global search_input
+        search_input = pokemon_name
+
+        # removes the window
+        root.destroy()
+
     # deletes the variables when you close the window
     def close():
         global search_input
@@ -71,6 +79,7 @@ def display_main(user_data):
                     img = ImageTk.PhotoImage(Image.open(io.BytesIO(raw_data)).resize((200, 200)))
                 else:
                     img = ImageTk.PhotoImage(Image.open("src/assets/transparent_placeholder.png").resize((200, 200)))
+            
             case "button":
                 if user_data[pokemon].to_list()[0] != "Empty":
                     # loads the relevant pokemon data into 'poke_data.json'
@@ -85,6 +94,22 @@ def display_main(user_data):
                     # creates the image that is to be displayed in the button
                     img = ImageTk.PhotoImage(Image.open(io.BytesIO(raw_data)).resize((65, 65)))
                 else:
+                    img = ImageTk.PhotoImage(Image.open("src/assets/transparent_placeholder.png"))
+            
+            case "type_button":
+                # loads the relevant pokemon data into 'poke_data.json'
+                main_model.search(pokemon)
+
+                try:
+                    with open("src/data/poke_data.json", "r") as file:
+                        poke_data = json.load(file)
+                        img_url = poke_data['sprites']['front_default']
+                    with urllib.request.urlopen(img_url) as u:
+                        raw_data = u.read()
+
+                    # creates the image that is to be displayed in the button
+                    img = ImageTk.PhotoImage(Image.open(io.BytesIO(raw_data)).resize((100, 100)))
+                except:
                     img = ImageTk.PhotoImage(Image.open("src/assets/transparent_placeholder.png"))
         
         return img
@@ -103,11 +128,29 @@ def display_main(user_data):
             # the rest of the stats
             for stat in poke_data['stats']:
                 stats_list.append(str(stat['base_stat']))
-            stats_list.append(str(poke_data['types'][0]['type']['name']))
+            # type info
+            type_list = []
+            for i in poke_data['types']:
+                type_list.append(str(i['type']['name']))
+            stats_list.append(type_list)
 
             return stats_list
         except:
-            return ["","","","","","","",""]
+            return ["","","","","","","",[""]]
+
+    # gets the data from type.json
+    def get_type():
+
+        with open("src/data/type_data.json") as file:
+            type_data = json.load(file)
+
+        type_name = type_data['name']
+
+        poke_name_list = []
+        for i in range(10):
+            poke_name_list.append(type_data['pokemon'][i]['pokemon']['name'])
+
+        return type_name, poke_name_list
 
     # actives mode to add pokemon
     def active_add():
@@ -186,25 +229,59 @@ def display_main(user_data):
     # prevents the frame from adjusting its size based on contents
     screen_frm.grid_propagate(False)
     
-    pokemon_img = ctk.CTkLabel(screen_frm, text="", image=get_sprite(pokemon_name, 'screen'))
-    pokemon_lbl = ctk.CTkLabel(screen_frm, text=pokemon_name, text_color=WHITE, font=("Arial", 24))
-
-    # frame that displays pokemon stats
-    stats_frm = ctk.CTkScrollableFrame(screen_frm, bg_color="transparent", fg_color="grey20",
+    if screen_mode == "pokemon":
+        pokemon_img = ctk.CTkLabel(screen_frm, text="", image=get_sprite(pokemon_name, 'screen'))
+        pokemon_lbl = ctk.CTkLabel(screen_frm, text=pokemon_name, text_color=WHITE, font=("Arial", 24))
+        
+        pokemon_img.grid(column=0, row=1, padx=10, pady=(10, 0))
+        pokemon_lbl.grid(column=0, row=2, pady=(0, 10))
+        
+        # frame that displays pokemon stats
+        stats_frm = ctk.CTkScrollableFrame(screen_frm, bg_color="transparent", fg_color="grey20",
                                         width=120, height=200, label_text="Stats", label_fg_color=RED)
     
-    stat_names = ["id: " ,"hp: ", "attack: ", "defense: ", "special-attack: ", "special-defense: ", "speed: ", "type: "]
-    stat_list = get_stats()
-    
-    for i in range(len(stat_list)):
-        ctk.CTkLabel(stats_frm, text=stat_names[i] + stat_list[i]
-                    ).grid(column=1, row = i + 1, pady=5)
-    
-    add_pokemon_btn = ctk.CTkButton(stats_frm, text="Add Pokémon", fg_color=YELLOW, hover_color=YELLOWSHADE,
+        stat_names = ["id: " ,"hp: ", "attack: ", "defense: ", "special-attack: ", "special-defense: ", "speed: ", "type: "]
+        stat_list = get_stats()
+        
+        for i in range(len(stat_list)):
+            if type(stat_list[i]) == str:
+                ctk.CTkLabel(stats_frm, text=stat_names[i] + stat_list[i]
+                            ).grid(column=1, row = i + 1, pady=5)
+                
+            else:
+                ctk.CTkLabel(stats_frm, text=stat_names[i] + (", ".join(stat_list[i]))
+                            ).grid(column=1, row = i + 1, pady=5)
+        
+        add_pokemon_btn = ctk.CTkButton(stats_frm, text="Add Pokémon", fg_color=YELLOW, hover_color=YELLOWSHADE,
                                     text_color=BLACK, corner_radius=15, width=60, height=30,
                                     command=active_add)
-    add_pokemon_btn.grid(column=1, row=0, pady=5)
+        add_pokemon_btn.grid(column=1, row=0, pady=5)
 
+    elif screen_mode == "type":
+        
+        type_data = get_type()
+        type_name = type_data[0]
+        type_name_list = type_data[1]
+
+        type_frm = ctk.CTkScrollableFrame(screen_frm, bg_color="transparent", fg_color="grey20",
+                                            width=350, height=200,
+                                            label_text=f"Type: {type_name}", label_fg_color=RED,
+                                            orientation="horizontal")
+        
+        function_list = []
+        column_position = 0
+
+        for i in range(len(type_name_list)):
+            function_list.append(lambda i=i: type_search(type_name_list[i]))
+
+            ctk.CTkButton(type_frm,text=type_name_list[i],
+                        fg_color=BLUE, bg_color="transparent", text_color=BLACK,
+                        hover_color=BLUESHADE, corner_radius=20, width=160, height=160,
+                        image=get_sprite(type_name_list[i], 'type_button'), compound="top",
+                        command=function_list[i]
+                        ).grid(row=0, column=column_position, pady=10, padx=10)
+            
+            column_position += 1
 
 
     # --buttons widgets--
@@ -266,11 +343,11 @@ def display_main(user_data):
 
     screen_background_lbl.grid(column=0, row=1, columnspan=4)
     screen_frm.grid(column=0, row=1, columnspan=4, rowspan=2)
-    
-    pokemon_img.grid(column=0, row=1, padx=10, pady=(10, 0))
-    pokemon_lbl.grid(column=0, row=2, pady=(0, 10))
 
-    stats_frm.grid(column=1, row=1, rowspan=50, padx=(0, 10), pady=10)
+    if screen_mode == "pokemon":
+        stats_frm.grid(column=1, row=1, rowspan=50, padx=(0, 10), pady=10)
+    if screen_mode == "type":
+        type_frm.grid(column=1, row=1, rowspan=50, padx=(0, 10), pady=10)
 
     btn_1.grid(column=0, row=3, padx=(30, 15), pady=(20, 10))
     btn_2.grid(column=1, row=3, padx=(15, 15), pady=(20, 10))
