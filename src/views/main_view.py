@@ -13,16 +13,15 @@ def display_main(user_data, screen_mode):
     global add_mode
     add_mode = False
 
-    global global_user_df
+    global global_user_data
     global_user_df = user_data
 
     # function that gets the input from the search bar
     def search(clicked_button, user_data, pokemon_name):
-        global global_user_data
-        global add_mode
 
         if add_mode == True and clicked_button[:4] == 'poke':
-            global_user_df.loc[0, clicked_button] = pokemon_name
+            user_id = user_data.index[0]
+            global_user_df.loc[user_id, clicked_button] = pokemon_name
         
         elif clicked_button == 'search':
             global search_input
