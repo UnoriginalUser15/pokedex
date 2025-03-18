@@ -25,8 +25,11 @@ def search(search_input):
             # writes data about searched type to a json file
             with open("src/data/type_data.json", "w") as type_json:
                 type_json.write(type_data)
+
         else:
             print(f"Error: {response}")
+        
+        return "type"
 
     # searches for pokemon based on ID or name
     else:
@@ -43,6 +46,4 @@ def search(search_input):
         elif response.status_code == 404:
             print(f"Error: Pokémon does not exist (404 Error)")
 
-# saves user data upon close
-def save():
-    pass
+        return "pokemon"

@@ -74,7 +74,7 @@ def register(username, password):
 
             new_user_df = pd.DataFrame([new_user])
             # appends the new user to the .csv file
-            new_user_df.to_csv('src/data/user_data.csv', mode='a',index=False , header= False)
+            new_user_df.to_csv('src/data/user_data.csv', mode='a',index=False , header=False)
 
             register_msg = "New account has been created!"
         except:
