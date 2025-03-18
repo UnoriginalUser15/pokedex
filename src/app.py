@@ -57,9 +57,10 @@ while valid_login == False:
 # controls an active session
 active_session = True
 search_input = ""
+screen_mode = "pokemon"
 
 while active_session == True:
-    main_output = main_view.display_main(user_data)
+    main_output = main_view.display_main(user_data, screen_mode)
 
     search_input = main_output[0]
     user_data = main_output[1]
@@ -85,4 +86,4 @@ while active_session == True:
         
         quit()
     
-    main_model.search(search_input)
+    screen_mode = main_model.search(search_input)
